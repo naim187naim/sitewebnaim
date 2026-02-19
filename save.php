@@ -1,34 +1,28 @@
 <?php
-// On force le chemin de SSMTP
-ini_set('sendmail_path', '/usr/sbin/ssmtp -t');
-
+// Connexion BDD
 $conn = new mysqli("localhost", "root", "", "demande_noelie");
 $to = "naimalime.pro@gmail.com";
 
-// En-tête pour éviter d'être considéré comme Spam
-$headers = "From: naimalime.pro@gmail.com\r\n";
-$headers .= "Reply-To: naimalime.pro@gmail.com\r\n";
-$headers .= "Content-Type: text/plain; charset=UTF-8";
-
-// CAS 1 : Clic sur un bouton
+// 1. Si elle clique sur un bouton
 if (isset($_POST['choix'])) {
     $choix = $conn->real_escape_string($_POST['choix']);
     $conn->query("INSERT INTO reponses (choix) VALUES ('CHOIX : $choix')");
-
-    $subject = "Choix de Noelie : $choix";
-    $message = "Salut Naim,\n\nNoelie a clique sur : $choix";
     
-    mail($to, $subject, $message, $headers);
+    // Commande magique (comme dans ton terminal)
+    $sujet = "Choix de Noelie : " . $choix;
+    shell_exec("echo 'Subject: $sujet\n\nNoelie a choisi : $choix' | ssmtp $to");
 }
 
-// CAS 2 : Message écrit sur la page jaune
+// 2. Si elle écrit un message (Page Jaune)
 if (isset($_POST['message_texte'])) {
-    $texte = $conn->real_escape_string($_POST['message_texte']);
-    $conn->query("INSERT INTO reponses (choix) VALUES ('MESSAGE : $texte')");
-
-    $subject = "Nouveau message de Noelie !";
-    $message = "Naim, tu as recu un message :\n\n---\n" . $_POST['message_texte'] . "\n---";
+    $texte = $_POST['message_texte'];
+    $texte_clean = $conn->real_escape_string($texte);
+    $conn->query("INSERT INTO reponses (choix) VALUES ('MESSAGE : $texte_clean')");
     
-    mail($to, $subject, $message, $headers);
+    // On prépare le message pour le terminal
+    $corps = "Subject: Nouveau message de Noelie\n\n" . $texte;
+    // On utilise escapeshellarg pour éviter les bugs avec les guillemets
+    $commande = "echo " . escapeshellarg($corps) . " | ssmtp " . $to;
+    shell_exec($commande);
 }
 ?>
