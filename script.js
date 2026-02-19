@@ -1,4 +1,3 @@
-
 const pages = {
     accueil: {
         title: "Pour Noélie",
@@ -50,15 +49,20 @@ const pages = {
     }
 };
 
+// --- LOGIQUE DU SITE ---
+
 function initHearts() {
-    const container = document.createElement('div');
-    container.className = 'bg-hearts';
-    container.id = 'bg-hearts';
-    document.body.prepend(container);
+    if (!document.getElementById('bg-hearts')) {
+        const container = document.createElement('div');
+        container.className = 'bg-hearts';
+        container.id = 'bg-hearts';
+        document.body.prepend(container);
+    }
 }
 
 function updateHearts(symbol) {
     const container = document.getElementById('bg-hearts');
+    if (!container) return;
     container.innerHTML = ''; 
     if (!symbol) return; 
     for(let i=0; i<15; i++) {
@@ -76,21 +80,26 @@ function updateHearts(symbol) {
 
 function changePage(pageKey) {
     const page = pages[pageKey];
+    if (!page) return;
+
     document.body.style.background = page.color;
     updateHearts(page.heart);
+    
     const app = document.getElementById('app');
     
     if (page.isInput) {
+        // Design pour la page JAUNE
         app.innerHTML = `
-            <div class="glass-card" style="background:rgba(255,255,255,0.9); color:black;">
+            <div class="glass-card" style="background:rgba(255,255,255,0.95); color:black; border:none;">
                 <h1 style="color:black;">${page.title}</h1>
                 <p style="color:#333;">${page.text}</p>
-                <textarea id="noelieMsg" placeholder="Ton message..."></textarea>
+                <textarea id="noelieMsg" placeholder="Écris ton message ici..." style="background:#f9f9f9; border:1px solid #ccc; color:black;"></textarea>
                 <div class="btn-container">
-                    <button onclick="sendFinalMsg()" style="background:black; color:white; border:none;">Envoyer le message</button>
+                    <button onclick="sendFinalMsg()" style="background:black; color:white; border:none;">Envoyer mon message</button>
                 </div>
             </div>`;
     } else {
+        // Design pour toutes les autres pages
         app.innerHTML = `
             <div class="glass-card">
                 <h1>${page.title}</h1>
@@ -103,25 +112,30 @@ function changePage(pageKey) {
 }
 
 function saveAndNext(choice) {
+    // Enregistre le clic dans save.php
     fetch('save.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: 'choix=' + encodeURIComponent(choice)
     });
+    // Passe à la page de résultat (Oui, Ami, ou Pas relation)
     changePage(choice);
 }
 
 function sendFinalMsg() {
     const val = document.getElementById('noelieMsg').value;
+    if (!val.trim()) return alert("Le message est vide !");
+
     fetch('save.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: 'message_texte=' + encodeURIComponent(val)
     }).then(() => {
         alert("Merci Noélie, j'ai bien reçu ton message !");
-        location.reload();
+        location.reload(); // Recommence à l'accueil après l'envoi
     });
 }
 
+// Lancement au démarrage
 initHearts();
 changePage('accueil');
