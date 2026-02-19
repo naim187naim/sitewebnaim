@@ -1,51 +1,52 @@
+
 const pages = {
     accueil: {
         title: "Pour Noélie",
         text: "Je sais que ça fait bien longtemps que je te parle du site web, mais je l'ai enfin fini en espérant qu'il te plaît.",
-        color: "#0f0f0f", 
-        heart: null, // Aucun cœur sur la première page
-        buttons: [{ text: "Next", action: "changePage('demande')" }]
+        color: "#0f0f0f", heart: null,
+        buttons: [{ text: "Suivant", action: "changePage('demande')" }]
     },
     demande: {
         title: "Noélie...",
-        text: "Noélie, je voudrais que tu saches à quel point tu es gentille, belle, intelligente... <br><br>Et je voudrais te dire que chaque moment passé avec toi est un moment incroyable. À chaque fois que je suis avec toi, je ne veux qu'une chose : pouvoir te tenir la main et te dire je t'aime.<br><br>Et c'est pour ça qu'aujourd'hui, je prends mon courage à deux mains pour te demander si tu voudrais sortir avec moi...",
-        color: "#2b0a1a", 
-        heart: "❤️",
+        text: "Noélie, je voudrais que tu saches à quel point tu es gentille, belle, intelligente...<br><br>Chaque moment passé avec toi est incroyable. Je voudrais pouvoir te tenir la main et te dire je t'aime.<br><br>C'est pour ça qu'aujourd'hui, je te demande si tu voudrais sortir avec moi...",
+        color: "#2b0a1a", heart: "❤️",
         buttons: [
-            { text: "Oui", action: "saveAndExit('oui')" },
+            { text: "Oui", action: "saveAndNext('oui')" },
             { text: "Non", action: "changePage('choixNon')" }
         ]
     },
     choixNon: {
         title: "Pourquoi ?",
-        text: "Bon, je vois que j'ai peut-être pas assez regardé de films romantiques pour te faire tomber sous mon charme... il faudrait que tu m'en conseilles plus alors...<br><br>Mais bon, je m'éloigne du sujet. J'ai une question à te poser avant : pourquoi tu ne veux pas ?",
-        color: "#1a0a0a", 
-        heart: "💔",
+        text: "Bon, je vois que je n'ai peut-être pas assez regardé de films romantiques... Mais j'ai une question : pourquoi tu ne veux pas ?",
+        color: "#1a0a0a", heart: "💔",
         buttons: [
-            { text: "Je ne veux pas de relation maintenant", action: "saveAndExit('pas_relation')" },
-            { text: "Je préfère que tu restes mon meilleur ami", action: "saveAndExit('ami')" }
+            { text: "Pas de relation maintenant", action: "saveAndNext('pas_relation')" },
+            { text: "Reste mon meilleur ami", action: "saveAndNext('ami')" }
         ]
     },
     oui: {
         title: "Je t'aime",
-        text: "Noélie, je t'aime, je t'aime, je t'aime. <br><br>Ça fait bientôt 3 ans que j'attends cette réponse. Tu ne pouvais pas me rendre plus heureux que maintenant. <br><br>Je te promets d'être le meilleur à tes yeux, d'être toujours là pour toi dans les bons comme les mauvais moments, et de t'aimer toujours plus chaque jour.<br><br>Je peux enfin te le dire : je t'aime, Noélie.",
-        color: "#3d0a1a", 
-        heart: "💖",
-        buttons: []
+        text: "Noélie, je t'aime ! Ça fait bientôt 3 ans que j'attends ça. Je te promets d'être le meilleur à tes yeux et de t'aimer toujours plus chaque jour.",
+        color: "#3d0a1a", heart: "💖",
+        buttons: [{ text: "Me laisser un petit message ?", action: "changePage('message')" }]
     },
     pas_relation: {
         title: "Je comprends",
-        text: "Ça veut dire que ce n'est pas encore perdu et que j'ai encore mes chances si j'ai quelque chose à te dire, Noélie. <br><br>Si tu ne veux pas te mettre en couple, c'est normal, tu as tes raisons. <br><br>Et si pour toi il faudrait encore attendre 10 ans... je le ferai.",
-        color: "#1d0a2b", 
-        heart: "💜🩹", // Cœurs violets avec pansements
-        buttons: []
+        text: "Si tu ne veux pas de couple maintenant, c'est normal. J'attendrai le temps qu'il faudra.",
+        color: "#1d0a2b", heart: "💜🩹",
+        buttons: [{ text: "Me laisser un petit message ?", action: "changePage('message')" }]
     },
     ami: {
         title: "Ma meilleure pote",
-        text: "Bon, si tel est ton choix, je dois le respecter.<br><br>Mais je veux que tu saches une chose : même en tant que meilleur ami, je serai toujours là pour toi et je ne te laisserai jamais tomber, peu importe ce qu'il se passe pour toi.<br><br><b>Ma meilleure pote.</b>",
-        color: "#0a1a2b", 
-        heart: "💙",
-        buttons: []
+        text: "Je respecte ton choix. Je serai toujours là pour toi, peu importe ce qu'il se passe. Ma meilleure pote.",
+        color: "#0a1a2b", heart: "💙",
+        buttons: [{ text: "Me laisser un petit message ?", action: "changePage('message')" }]
+    },
+    message: {
+        title: "Un dernier mot ?",
+        text: "Si tu as envie de me dire quelque chose de particulier, écris-le ici :",
+        color: "#f1c40f", heart: null,
+        isInput: true
     }
 };
 
@@ -60,50 +61,66 @@ function updateHearts(symbol) {
     const container = document.getElementById('bg-hearts');
     container.innerHTML = ''; 
     if (!symbol) return; 
-
     for(let i=0; i<15; i++) {
-        setTimeout(() => createHeart(symbol), i * 300);
+        setTimeout(() => {
+            const h = document.createElement('div');
+            h.className = 'floating-heart';
+            h.innerHTML = symbol;
+            h.style.left = Math.random() * 100 + 'vw';
+            h.style.animationDuration = (Math.random() * 3 + 4) + 's';
+            container.appendChild(h);
+            setTimeout(() => h.remove(), 6000);
+        }, i * 300);
     }
-}
-
-function createHeart(symbol) {
-    const container = document.getElementById('bg-hearts');
-    if(!container) return;
-    const h = document.createElement('div');
-    h.className = 'floating-heart';
-    h.innerHTML = symbol;
-    h.style.left = Math.random() * 100 + 'vw';
-    h.style.animationDuration = (Math.random() * 3 + 4) + 's';
-    container.appendChild(h);
-    
-    // Supprime le coeur après l'animation pour ne pas ralentir le PC
-    setTimeout(() => h.remove(), 6000);
 }
 
 function changePage(pageKey) {
     const page = pages[pageKey];
     document.body.style.background = page.color;
     updateHearts(page.heart);
-    
     const app = document.getElementById('app');
-    app.innerHTML = `
-        <div class="glass-card">
-            <h1>${page.title}</h1>
-            <p>${page.text}</p>
-            <div class="btn-container">
-                ${page.buttons.map(btn => `<button onclick="${btn.action}">${btn.text}</button>`).join('')}
-            </div>
-        </div>
-    `;
+    
+    if (page.isInput) {
+        app.innerHTML = `
+            <div class="glass-card" style="background:rgba(255,255,255,0.9); color:black;">
+                <h1 style="color:black;">${page.title}</h1>
+                <p style="color:#333;">${page.text}</p>
+                <textarea id="noelieMsg" placeholder="Ton message..."></textarea>
+                <div class="btn-container">
+                    <button onclick="sendFinalMsg()" style="background:black; color:white; border:none;">Envoyer le message</button>
+                </div>
+            </div>`;
+    } else {
+        app.innerHTML = `
+            <div class="glass-card">
+                <h1>${page.title}</h1>
+                <p>${page.text}</p>
+                <div class="btn-container">
+                    ${page.buttons.map(btn => `<button onclick="${btn.action}">${btn.text}</button>`).join('')}
+                </div>
+            </div>`;
+    }
 }
 
-function saveAndExit(choice) {
+function saveAndNext(choice) {
     fetch('save.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: `choix=${encodeURIComponent(choice)}`
+        body: 'choix=' + encodeURIComponent(choice)
     });
     changePage(choice);
+}
+
+function sendFinalMsg() {
+    const val = document.getElementById('noelieMsg').value;
+    fetch('save.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'message_texte=' + encodeURIComponent(val)
+    }).then(() => {
+        alert("Merci Noélie, j'ai bien reçu ton message !");
+        location.reload();
+    });
 }
 
 initHearts();
