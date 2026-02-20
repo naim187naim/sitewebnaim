@@ -2,17 +2,14 @@
 $conn = new mysqli("localhost", "root", "", "demande_noelie");
 $to = "naimalime.pro@gmail.com";
 
-// Enregistrement Choix
 if (isset($_POST['choix'])) {
-    $c = $conn->real_escape_string($_POST['choix']);
-    $conn->query("INSERT INTO reponses (choix) VALUES ('CHOIX : $c')");
-    shell_exec("echo 'Subject: Choix Noelie\n\nElle a choisi : $c' | ssmtp $to");
-}
-
-// Enregistrement Message
-if (isset($_POST['message_texte'])) {
-    $m = $conn->real_escape_string($_POST['message_texte']);
-    $conn->query("INSERT INTO reponses (choix) VALUES ('MESSAGE : $m')");
-    shell_exec("echo 'Subject: Message Noelie\n\nMessage : $m' | ssmtp $to");
+    $choix = $conn->real_escape_string($_POST['choix']);
+    
+    // 1. Sauvegarde BDD
+    $conn->query("INSERT INTO reponses (choix) VALUES ('$choix')");
+    
+    // 2. Envoi Mail (Méthode terminal)
+    $sujet = "Choix de Noelie : " . $choix;
+    shell_exec("echo 'Subject: $sujet\n\nNoelie a choisi : $choix' | ssmtp $to");
 }
 ?>

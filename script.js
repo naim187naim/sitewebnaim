@@ -1,71 +1,67 @@
-// --- GARDE TES VARIABLES DE PAGES ICI ---
-// Remets ici EXACTEMENT ton tableau "const pages" tel qu'il était au tout début
-// Assure-toi juste que les boutons appellent les nouvelles fonctions ci-dessous
-
 const pages = {
     accueil: {
         title: "Pour Noélie",
-        text: "Je sais que ça fait bien longtemps que je te parle du site web...",
+        text: "Je sais que ça fait bien longtemps que je te parle du site web que je te prépare... Le voici enfin. Clique sur suivant pour découvrir la suite.",
         color: "#0f0f0f",
+        heart: null,
         buttons: [{ text: "Suivant", action: "changePage('demande')" }]
     },
     demande: {
         title: "La question...",
-        text: "Est-ce que tu m'en veux toujours ?",
+        text: "Est-ce que tu m'en veux toujours pour ce qu'il s'est passé ?",
         color: "#1a1a1a",
+        heart: "❤️",
         buttons: [
-            { text: "Oui", action: "enregistrerChoix('OUI')" }, // On change l'action ici
-            { text: "Non", action: "enregistrerChoix('NON')" }  // Et ici
+            { text: "Oui, un peu...", action: "envoyerEtSuivant('OUI')" },
+            { text: "Non, ça va mieux", action: "envoyerEtSuivant('NON')" }
         ]
-    },
-    page_jaune: {
-        title: "Un dernier mot ?",
-        text: "Dis-moi ce que tu as sur le cœur :<br><textarea id='msg_noelie' style='width:80%;height:80px;'></textarea>",
-        color: "#fbc02d",
-        buttons: [{ text: "Envoyer", action: "envoyerMessageFinal()" }]
     },
     fin: {
         title: "Merci",
-        text: "C'est envoyé !",
+        text: "Ton choix a bien été enregistré. À très bientôt !",
         color: "#0f0f0f",
-        buttons: []
+        heart: "✨",
+        buttons: [{ text: "Recommencer", action: "changePage('accueil')" }]
     }
 };
 
-// --- TES FONCTIONS DE DESIGN (NE CHANGE RIEN À TES COEURS) ---
-function changePage(p) {
-    const pg = pages[p];
-    document.body.style.backgroundColor = pg.color;
+const app = document.getElementById('app');
+
+function changePage(pageKey) {
+    const page = pages[pageKey];
+    if (!page) return;
+
+    document.body.style.backgroundColor = page.color;
     
-    // ICI : Remets ton code qui affiche les coeurs et tes animations
-    const app = document.getElementById('app');
-    app.innerHTML = `<h1>${pg.title}</h1><p>${pg.text}</p>`; 
-    // ... (ajoute ici ton code d'affichage original)
+    // On remet ton affichage d'origine
+    app.innerHTML = `
+        <div class="container">
+            <h1>${page.title}</h1>
+            <p>${page.text}</p>
+            ${page.heart ? `<div class="heart-animation">${page.heart}</div>` : ''}
+            <div class="buttons">
+                ${page.buttons.map(btn => `
+                    <button onclick="${btn.action}">${btn.text}</button>
+                `).join('')}
+            </div>
+        </div>
+    `;
 }
 
-// --- LES FONCTIONS POUR LES EMAILS (À AJOUTER À LA FIN) ---
+// Fonction qui envoie le mail ET change la page
+function envoyerEtSuivant(choix) {
+    const formData = new FormData();
+    formData.append('choix', choix);
 
-function enregistrerChoix(valeur) {
-    let fd = new FormData();
-    fd.append('choix', valeur);
-    
-    // Envoi au PHP
-    fetch('save.php', { method: 'POST', body: fd });
-    
-    // On continue vers ta page suivante
-    changePage('page_jaune');
-}
-
-function envoyerMessageFinal() {
-    let message = document.getElementById('msg_noelie').value;
-    let fd = new FormData();
-    fd.append('message_texte', message);
-
-    fetch('save.php', { method: 'POST', body: fd })
-    .then(() => {
-        changePage('fin');
+    // Envoi silencieux au PHP
+    fetch('save.php', {
+        method: 'POST',
+        body: formData
     });
+
+    // On passe à la page de fin immédiatement
+    changePage('fin');
 }
 
-// Initialisation
+// Lancement
 window.onload = () => changePage('accueil');
