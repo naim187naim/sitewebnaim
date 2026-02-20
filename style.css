@@ -13,7 +13,7 @@ body {
     align-items: center;
     overflow: hidden;
     color: white;
-    transition: background 1.5s ease; /* Transition douce des couleurs de fond */
+    transition: background 1.5s ease;
 }
 
 .bg-hearts {
